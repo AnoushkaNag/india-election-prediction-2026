@@ -4,13 +4,14 @@ from sklearn.metrics import accuracy_score
 
 
 def prepare_data(df):
-    # Target: 1 = retain (strong margin), 0 = weak/flip
+    # Target (keep this simple)
     df["target"] = df["margin"].apply(lambda x: 1 if x > 0.08 else 0)
 
+    # ❌ REMOVE leakage features
+    # margin, vote_share_winner, vote_share_runner
+
+    # ✅ CLEAN feature set
     features = [
-        "vote_share_winner",
-        "vote_share_runner",
-        "margin",
         "swing_risk",
         "dominant_win",
         "incumbent",
@@ -21,11 +22,11 @@ def prepare_data(df):
 
 
 if __name__ == "__main__":
-    df = pd.read_csv("data/processed/final_features.csv")
+    df = pd.read_csv("data/processed/final_with_rules.csv")
 
     df, features = prepare_data(df)
 
-    # 🔥 TRAIN = 2016, TEST = 2021
+    # Train on 2016, test on 2021
     train_df = df[df["year"] == 2016].copy()
     test_df = df[df["year"] == 2021].copy()
 
@@ -35,17 +36,13 @@ if __name__ == "__main__":
     X_test = test_df[features]
     y_test = test_df["target"]
 
-    # Model
-    model = RandomForestClassifier(n_estimators=100, random_state=42)
+    model = RandomForestClassifier(n_estimators=150, random_state=42)
     model.fit(X_train, y_train)
 
-    # Predictions
     test_df["ml_probability"] = model.predict_proba(X_test)[:, 1]
     test_df["ml_prediction"] = model.predict(X_test)
 
-    # Accuracy
     acc = accuracy_score(y_test, test_df["ml_prediction"])
     print(f"\nML Accuracy: {acc:.4f}")
 
-    # Save only TEST (2021)
     test_df.to_csv("data/processed/final_with_ml.csv", index=False)
