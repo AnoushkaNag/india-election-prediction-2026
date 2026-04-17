@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # India Election Prediction 2026 🇮🇳
 
 Hybrid Machine Learning + Rule-Based system to predict constituency-level election outcomes.
@@ -12,14 +11,10 @@ Predict winning candidates across constituencies using historical data, candidat
 - Hybrid decision system combining both
 
 ## 📂 Project Structure
-- `data/` → raw and cleaned datasets
-- `notebooks/` → exploratory analysis
-- `src/` → core pipeline (rules + ML)
-- `outputs/` → final predictions
+- `data/` → raw and cleaned datasets  
+- `notebooks/` → exploratory analysis  
+- `src/` → core pipeline (rules + ML)  
+- `outputs/` → final predictions  
 
 ## 🚀 Status
 Setting up dataset and preprocessing pipeline.
-=======
-# india-election-prediction-2026
-Hybrid ML + rule-based election prediction system
->>>>>>> bd45eaffb4409f51fcc580da956d7c1a8b704510
