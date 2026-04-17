@@ -73,7 +73,7 @@ def find_column(df, keywords):
             return matching[0]
     return None
 
-def detect_columns(df, state_name):
+def detect_columns(df, state_name, debug=False):
     """
     Detect relevant columns with graceful fallback handling.
     ECI format: STATE/UT NAME, AC NAME, CANDIDATE NAME, PARTY, TOTAL (votes)
@@ -81,6 +81,7 @@ def detect_columns(df, state_name):
     Args:
         df: DataFrame with ECI election data
         state_name: State name for logging
+        debug: If True, print first few rows if detection fails
         
     Returns:
         Tuple of (constituency_col, party_col, votes_col, df) or (None, None, None, df) if detection fails
@@ -108,6 +109,12 @@ def detect_columns(df, state_name):
             logger.warning(f"  Could not find party column (tried: {party_keywords})")
         if not votes_col:
             logger.warning(f"  Could not find votes column (tried: {votes_keywords})")
+        
+        # Debug: Show first few rows if detection fails
+        if debug and len(df) > 0:
+            logger.debug(f"  First few rows of data:")
+            for idx, row in df.head(2).iterrows():
+                logger.debug(f"    Row {idx}: {dict(row)}")
     
     return constituency_col, party_col, votes_col, df
 
@@ -118,6 +125,7 @@ def detect_columns(df, state_name):
 def extract_top2(df, state_name, year, data_type):
     """
     Extract top 2 candidates per constituency.
+    Handles NaN values, type conversions, and invalid data gracefully.
     
     Args:
         df: Raw DataFrame from Excel file
@@ -128,12 +136,24 @@ def extract_top2(df, state_name, year, data_type):
     Returns:
         DataFrame with top 2 candidates and vote counts per constituency
     """
-    constituency_col, party_col, votes_col, df = detect_columns(df, state_name)
+    constituency_col, party_col, votes_col, df = detect_columns(df, state_name, debug=True)
     
     # Graceful handling of missing columns
     if not all([constituency_col, party_col, votes_col]):
         logger.error(f"Skipping {state_name}: Could not detect all required columns")
         return pd.DataFrame()
+    
+    # Ensure text columns are strings (handle NaN properly)
+    try:
+        df[constituency_col] = df[constituency_col].astype(str).str.strip()
+        df[party_col] = df[party_col].astype(str).str.strip()
+        # Remove rows with NaN or 'nan' values in critical columns
+        df = df[df[constituency_col] != 'nan']
+        df = df[df[party_col] != 'nan']
+        df = df[df[constituency_col].notna()]
+        df = df[df[party_col].notna()]
+    except Exception as e:
+        logger.warning(f"Error converting text columns for {state_name}: {e}")
     
     results = []
     
@@ -145,9 +165,17 @@ def extract_top2(df, state_name, year, data_type):
         return pd.DataFrame()
     
     for const, group in grouped:
+        # Skip rows with NaN values
+        group = group.dropna(subset=[votes_col])
+        
+        if len(group) == 0:
+            continue
+        
         # Sort by votes in descending order
         try:
-            group = group.sort_values(by=votes_col, ascending=False)
+            # Convert votes to numeric first
+            group[votes_col] = pd.to_numeric(group[votes_col], errors='coerce')
+            group = group.sort_values(by=votes_col, ascending=False, na_position='last')
         except Exception as e:
             logger.warning(f"Failed to sort votes for {state_name}/{const}: {e}")
             continue
@@ -162,12 +190,21 @@ def extract_top2(df, state_name, year, data_type):
             runner = group.iloc[1]
             
             # Safely convert votes to integers
-            winner_votes = int(pd.to_numeric(winner[votes_col], errors='coerce'))
-            runner_votes = int(pd.to_numeric(runner[votes_col], errors='coerce'))
+            winner_votes = pd.to_numeric(winner[votes_col], errors='coerce')
+            runner_votes = pd.to_numeric(runner[votes_col], errors='coerce')
             
-            # Skip if vote conversion failed
+            # Skip if vote conversion failed or values are NaN
             if pd.isna(winner_votes) or pd.isna(runner_votes):
-                logger.warning(f"Invalid vote counts for {state_name}/{const}")
+                logger.debug(f"Invalid vote counts for {state_name}/{const}: winner={winner_votes}, runner={runner_votes}")
+                continue
+            
+            # Convert to int
+            winner_votes = int(winner_votes)
+            runner_votes = int(runner_votes)
+            
+            # Skip if either vote count is 0
+            if winner_votes <= 0 or runner_votes <= 0:
+                logger.debug(f"Skipping {state_name}/{const}: Zero or negative votes")
                 continue
             
             results.append({
@@ -185,7 +222,7 @@ def extract_top2(df, state_name, year, data_type):
                 "data_type": data_type
             })
         except Exception as e:
-            logger.warning(f"Error processing {state_name}/{const}: {e}")
+            logger.debug(f"Error processing {state_name}/{const}: {e}")
             continue
     
     result_df = pd.DataFrame(results)
@@ -220,24 +257,39 @@ def process_all():
 
         logger.info(f"\nProcessing {state} {year} ({dtype})...")
 
-        try:
-            # Read Excel file with row 3 as header (ECI format has actual header at row 3)
-            df = pd.read_excel(abs_path, sheet_name=0, header=3)
-            logger.info(f"  Loaded {len(df)} rows from Excel")
-            
-            processed = extract_top2(df, state, year, dtype)
-
-            if not processed.empty:
-                all_data.append(processed)
-                processed_states.append((state, year))
-                logger.info(f"  ✓ Successfully processed {state} {year}")
-            else:
-                logger.warning(f"  ✗ No data extracted from {state} {year}")
-                failed_states.append((state, year, "No data extracted"))
+        # Try multiple header row values
+        df = None
+        headers_to_try = [3, 2, 1, 0]
+        
+        for header_row in headers_to_try:
+            try:
+                df = pd.read_excel(abs_path, sheet_name=0, header=header_row)
+                logger.info(f"  Loaded {len(df)} rows from Excel (header at row {header_row})")
                 
-        except Exception as e:
-            logger.error(f"Error processing {state} {year}: {e}")
-            failed_states.append((state, year, str(e)))
+                # Try to process with this header
+                processed = extract_top2(df, state, year, dtype)
+                
+                if not processed.empty:
+                    all_data.append(processed)
+                    processed_states.append((state, year))
+                    logger.info(f"  ✓ Successfully processed {state} {year} (header at row {header_row})")
+                    df = None  # Mark as successful
+                    break
+                else:
+                    # This header didn't work, try next
+                    logger.debug(f"  Header row {header_row}: No data extracted, trying next...")
+                    continue
+                    
+            except Exception as e:
+                logger.debug(f"  Header row {header_row}: Error - {e}")
+                continue
+        
+        # If no header worked, record failure
+        if df is not None or all([len(all_data) == 0 or processed_states[-1] != (state, year)]):
+            # Check if this was actually added to processed states
+            if (state, year) not in processed_states:
+                logger.warning(f"  ✗ No data extracted from {state} {year}")
+                failed_states.append((state, year, "No valid header found or no data extracted"))
 
     # Generate output
     logger.info("\n" + "=" * 60)
