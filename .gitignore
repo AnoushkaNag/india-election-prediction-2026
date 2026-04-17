@@ -21,3 +21,7 @@ Thumbs.db
 
 # VS Code
 .vscode/
+data/raw/
+data/processed/
+*.xlsx
+*.csv
