@@ -1,22 +1,27 @@
 import pandas as pd
 
 def apply_rules(df):
+    """Apply rule-based scoring using structural features."""
     scores = []
 
     for _, row in df.iterrows():
         score = 0
 
-        # Rule 1: Close contest → likely flip
-        if row["margin"] < 0.05:
-            score -= 2
+        # Rule 1: Incumbent advantage
+        if row["incumbent"] == 1:
+            score += 1
 
-        # Rule 2: Strong win → likely retain
-        if row["margin"] > 0.15:
+        # Rule 2: Close contest → likely flip risk
+        if row["close_contest"] == 1:
+            score -= 1
+
+        # Rule 3: Safe seat → likely retain
+        if row["safe_seat"] == 1:
             score += 2
 
-        # Rule 3: Medium margin
-        if 0.05 <= row["margin"] <= 0.15:
-            score += 0.5
+        # Rule 4: Anti-incumbency → flip risk
+        if row["margin_change"] < 0:
+            score -= 1
 
         scores.append(score)
 

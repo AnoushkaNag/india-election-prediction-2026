@@ -37,6 +37,31 @@ def create_features(df):
     df["margin_change"] = df["margin"] - df["prev_margin"]
     # For first year (where prev_margin is NaN), set margin_change to 0
     df["margin_change"] = df["margin_change"].fillna(0)
+
+    # ============================================
+    # NEW FEATURES: Close contest & swing risk
+    # ============================================
+    
+    # Close contest: margin < 0.08 (8 percentage points)
+    df["close_contest"] = (df["margin"] < 0.08).astype(int)
+    
+    # Safe seat: margin > 0.15 (15 percentage points)
+    df["safe_seat"] = (df["margin"] > 0.15).astype(int)
+    
+    # Anti-incumbency: negative margin change
+    df["anti_incumbency"] = (df["margin_change"] < 0).astype(int)
+    
+    # Flip probability: composite metric for unstable seats
+    df["flip_probability"] = (
+        df["close_contest"] +
+        df["anti_incumbency"] +
+        df["swing_risk"]
+    )
+    
+    # Fill any remaining NaN values with 0
+    for col in df.columns:
+        if df[col].dtype == 'float64':
+            df[col] = df[col].fillna(0)
     
     return df
 

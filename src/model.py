@@ -10,12 +10,13 @@ def prepare_data(df):
     # ❌ REMOVE leakage features
     # margin, vote_share_winner, vote_share_runner
 
-    # ✅ CLEAN feature set
+    # ✅ CLEAN feature set (no leakage)
     features = [
         "swing_risk",
         "dominant_win",
         "incumbent",
-        "margin_change"
+        "margin_change",
+        "flip_probability"
     ]
 
     return df, features
@@ -36,7 +37,14 @@ if __name__ == "__main__":
     X_test = test_df[features]
     y_test = test_df["target"]
 
-    model = RandomForestClassifier(n_estimators=150, random_state=42)
+    # Regularized model to avoid overfitting and improve generalization
+    model = RandomForestClassifier(
+        n_estimators=80,
+        max_depth=4,
+        min_samples_split=10,
+        min_samples_leaf=5,
+        random_state=42
+    )
     model.fit(X_train, y_train)
 
     test_df["ml_probability"] = model.predict_proba(X_test)[:, 1]

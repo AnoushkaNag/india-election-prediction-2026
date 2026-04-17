@@ -2,20 +2,30 @@ import pandas as pd
 
 
 def generate_predictions(df):
+    """Generate predicted winners using prediction and party/candidate names."""
     predictions = []
 
     for _, row in df.iterrows():
-
         if row["prediction"] == 1:
-            # retain
-            winner = row["winner_party"]
-
-        else:
-            # flip logic
-            if row["margin"] < 0.03:
-                winner = row["runner_up_party"]
+            # Retain current winner
+            # Try candidate name first, fall back to party
+            if "winner_name" in df.columns and pd.notna(row.get("winner_name")):
+                winner = row["winner_name"]
             else:
                 winner = row["winner_party"]
+        else:
+            # Flip to runner-up
+            # If margin is very small, predict flip; otherwise keep winner
+            if row.get("margin", 1) < 0.03:
+                if "runner_up_name" in df.columns and pd.notna(row.get("runner_up_name")):
+                    winner = row["runner_up_name"]
+                else:
+                    winner = row["runner_up_party"]
+            else:
+                if "winner_name" in df.columns and pd.notna(row.get("winner_name")):
+                    winner = row["winner_name"]
+                else:
+                    winner = row["winner_party"]
 
         predictions.append(winner)
 

@@ -19,14 +19,15 @@ def hybrid_prediction(df, ml_weight=0.6, rule_weight=0.4, threshold=0.6):
 
     # Combine ML and rule-based scores
     df["final_score"] = (
-        ml_weight * df["ml_probability"]
-        + rule_weight * df["rule_score_norm"]
+        0.6 * df["ml_probability"]
+        + 0.4 * df["rule_score_norm"]
     )
 
+    # Add current trend simulation: reduce confidence in unstable seats
+    df["final_score"] = df["final_score"] - (0.08 * df["flip_probability"])
+
     # Make hybrid prediction
-    df["prediction"] = df["final_score"].apply(
-        lambda x: 1 if x > threshold else 0
-    )
+    df["prediction"] = (df["final_score"] > 0.6).astype(int)
 
     return df
 
