@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import os
 from sklearn.metrics import accuracy_score
 
 
@@ -61,9 +62,19 @@ def hybrid_prediction(df, ml_weight=0.6, rule_weight=0.4, threshold=0.6):
 
 
 if __name__ == "__main__":
+    # Ensure outputs folder exists
+    os.makedirs("outputs", exist_ok=True)
+    
     df = pd.read_csv("data/processed/final_with_ml.csv")
 
     df = hybrid_prediction(df)
+
+    # DEBUG: Check before saving
+    print("\nDEBUG: df shape before save:", df.shape)
+    print(f"DEBUG: df has {len(df)} rows")
+    
+    if len(df) == 0:
+        raise ValueError("ERROR: DataFrame is empty before saving final_predictions.csv")
 
     # Evaluate hybrid model
     acc = accuracy_score(df["target"], df["prediction"])
@@ -77,6 +88,13 @@ if __name__ == "__main__":
     print(f"    Retain (1): {(df['prediction'] == 1).sum()}")
     print(f"    Flip (0): {(df['prediction'] == 0).sum()}")
 
+    # Save to outputs folder
+    output_path = "outputs/final_predictions.csv"
+    df.to_csv(output_path, index=False)
+    
+    print(f"\nSaved {output_path} successfully")
+    print(f"File size: {len(df)} rows")
+    
+    # Also save to processed for backward compatibility
     df.to_csv("data/processed/final_predictions.csv", index=False)
-
-    print("\nHybrid predictions complete!")
+    print("Hybrid predictions complete!")
