@@ -51,7 +51,8 @@ FILES = [
 
 def standardize_columns(df):
     """Normalize column names: lowercase, strip whitespace, replace spaces with underscores."""
-    df.columns = [col.strip().lower().replace(' ', '_') for col in df.columns]
+    # Convert column names to string first to handle numeric column names (e.g., from 2016 data)
+    df.columns = [str(col).strip().lower().replace(' ', '_') for col in df.columns]
     return df
 
 def find_column(df, keywords):

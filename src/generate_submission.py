@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 def generate_predictions(df):
     final_winners = []
 
@@ -8,9 +9,13 @@ def generate_predictions(df):
         if row["prediction"] == 1:
             # retain → same party
             winner = row["winner_party"]
+
         else:
-            # flip → runner-up becomes winner
-            winner = row["runner_up_party"]
+            # smarter flip logic
+            if row["margin"] < 0.03:
+                winner = row["runner_up_party"]
+            else:
+                winner = row["winner_party"]
 
         final_winners.append(winner)
 
@@ -24,10 +29,9 @@ if __name__ == "__main__":
 
     df = generate_predictions(df)
 
-    # Keep only required columns
     submission = df[["state", "constituency", "predicted_winner"]]
 
     submission.to_excel("outputs/final_submission.xlsx", index=False)
 
-    print("Submission file ready!")
+    print("\nSubmission file ready!")
     print(submission.head())
