@@ -30,8 +30,32 @@ def hybrid_prediction(df, ml_weight=0.6, rule_weight=0.4, threshold=0.6):
     # Add slight randomness for generalization and realistic variation
     df["final_score"] += np.random.uniform(-0.01, 0.01, len(df))
 
-    # Make hybrid prediction
+    # PART 2: Add state-level political priors
+    # Kerala (alternating pattern → push flips)
+    df.loc[df["state"] == "Kerala", "final_score"] -= 0.08
+
+    # Tamil Nadu (anti-incumbency strong)
+    df.loc[df["state"] == "Tamil Nadu", "final_score"] -= 0.07
+
+    # West Bengal (dominant party stability)
+    df.loc[df["state"] == "West Bengal", "final_score"] += 0.08
+
+    # Assam (moderate incumbency advantage)
+    df.loc[df["state"] == "Assam", "final_score"] += 0.04
+
+    # Puducherry (volatile → slight randomness)
+    mask = df["state"] == "Puducherry"
+    df.loc[mask, "final_score"] += np.random.uniform(-0.03, 0.03, mask.sum())
+
+    # PART 3: ML confidence override
+    df.loc[df["ml_probability"] > 0.8, "prediction"] = 1
+    df.loc[df["ml_probability"] < 0.2, "prediction"] = 0
+
+    # PART 4: Final prediction based on threshold
     df["prediction"] = (df["final_score"] > 0.6).astype(int)
+
+    # PART 5: Safe seat locking (margin > 0.15 → retain winner)
+    df.loc[df["margin"] > 0.15, "prediction"] = 1
 
     return df
 

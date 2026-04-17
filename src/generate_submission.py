@@ -10,13 +10,13 @@ def generate_predictions(df):
         
         if row["prediction"] == 1:
             # Retain current winner - use candidate name
-            winner = row.get("winner_name")
+            winner = row.get("winner_name", None)
         else:
             # Flip to runner-up - use candidate name
-            winner = row.get("runner_up_name")
+            winner = row.get("runner_up_name", None)
         
         # Fallback to party if candidate name is missing or empty
-        if not winner or (isinstance(winner, str) and winner.lower() == "nan"):
+        if not winner or str(winner).strip().lower() == "nan":
             if row["prediction"] == 1:
                 winner = row.get("winner_party")
             else:
