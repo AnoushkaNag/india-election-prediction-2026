@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from sklearn.metrics import accuracy_score
 
 
@@ -23,8 +24,11 @@ def hybrid_prediction(df, ml_weight=0.6, rule_weight=0.4, threshold=0.6):
         + 0.4 * df["rule_score_norm"]
     )
 
-    # Add current trend simulation: reduce confidence in unstable seats
-    df["final_score"] = df["final_score"] - (0.08 * df["flip_probability"])
+    # Add controlled flip bias penalty (reduces confidence in unstable seats)
+    df["final_score"] = df["final_score"] - (0.10 * df["flip_probability"])
+
+    # Add slight randomness for generalization and realistic variation
+    df["final_score"] += np.random.uniform(-0.01, 0.01, len(df))
 
     # Make hybrid prediction
     df["prediction"] = (df["final_score"] > 0.6).astype(int)
@@ -43,6 +47,7 @@ if __name__ == "__main__":
     print(f"  Accuracy: {acc:.4f}")
     print(f"  Weight (ML): 0.6")
     print(f"  Weight (Rules): 0.4")
+    print(f"  Flip penalty: 0.10")
     print(f"  Threshold: 0.6")
     print(f"  Predictions distribution:")
     print(f"    Retain (1): {(df['prediction'] == 1).sum()}")

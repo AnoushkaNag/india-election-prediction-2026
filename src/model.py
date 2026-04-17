@@ -7,16 +7,11 @@ def prepare_data(df):
     # Target (keep this simple)
     df["target"] = df["margin"].apply(lambda x: 1 if x > 0.08 else 0)
 
-    # ❌ REMOVE leakage features
-    # margin, vote_share_winner, vote_share_runner
-
-    # ✅ CLEAN feature set (no leakage)
+    # ✅ USE ONLY non-leakage features (NO margin derivatives)
     features = [
         "swing_risk",
-        "dominant_win",
         "incumbent",
-        "margin_change",
-        "flip_probability"
+        "dominant_win"
     ]
 
     return df, features
@@ -37,10 +32,10 @@ if __name__ == "__main__":
     X_test = test_df[features]
     y_test = test_df["target"]
 
-    # Regularized model to avoid overfitting and improve generalization
+    # Regularized model for realistic predictions without overfitting
     model = RandomForestClassifier(
-        n_estimators=80,
-        max_depth=4,
+        n_estimators=100,
+        max_depth=5,
         min_samples_split=10,
         min_samples_leaf=5,
         random_state=42
