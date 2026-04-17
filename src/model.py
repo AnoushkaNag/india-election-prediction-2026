@@ -21,7 +21,7 @@ def prepare_data(df):
 
 
 if __name__ == "__main__":
-    df = pd.read_csv("data/processed/final_with_rules.csv")
+    df = pd.read_csv("data/processed/final_features.csv")
 
     df, features = prepare_data(df)
 
