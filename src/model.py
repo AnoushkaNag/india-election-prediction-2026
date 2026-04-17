@@ -11,7 +11,9 @@ def prepare_data(df):
         "vote_share_runner",
         "margin",
         "swing_risk",
-        "dominant_win"
+        "dominant_win",
+        "incumbent",
+        "margin_change"
     ]
 
     X = df[features]

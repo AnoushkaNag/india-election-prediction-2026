@@ -18,16 +18,31 @@ logger = logging.getLogger(__name__)
 # =========================
 
 FILES = [
-    ("../data/raw/kerala_detailed.xlsx", "Kerala", "target"),
-    ("../data/raw/tamilnadu_detailed.xlsx", "Tamil Nadu", "target"),
-    ("../data/raw/assam_detailed.xlsx", "Assam", "target"),
-    ("../data/raw/wb_detailed.xlsx", "West Bengal", "target"),
-    ("../data/raw/puducherry_detailed.xlsx", "Puducherry", "target"),
+    # Kerala
+    ("../data/raw/kerala_detailed.xlsx", "Kerala", 2021, "target"),
+    ("../data/raw/kerala_2016_detailed.xlsx", "Kerala", 2016, "target"),
 
-    ("../data/raw/andhra_pradesh_detailed.xlsx", "Andhra Pradesh", "extra"),
-    ("../data/raw/odisha_detailed.xlsx", "Odisha", "extra"),
-    ("../data/raw/delhi_detailed.xlsx", "Delhi", "extra"),
-    ("../data/raw/jharkhand_detailed.xlsx", "Jharkhand", "extra"),
+    # Tamil Nadu
+    ("../data/raw/tamilnadu_detailed.xlsx", "Tamil Nadu", 2021, "target"),
+    ("../data/raw/tamilnadu_2016_detailed.xlsx", "Tamil Nadu", 2016, "target"),
+
+    # Assam
+    ("../data/raw/assam_detailed.xlsx", "Assam", 2021, "target"),
+    ("../data/raw/Assam_2016_detailed.xlsx", "Assam", 2016, "target"),
+
+    # West Bengal
+    ("../data/raw/wb_detailed.xlsx", "West Bengal", 2021, "target"),
+    ("../data/raw/westbengal_2016_detailed.xlsx", "West Bengal", 2016, "target"),
+
+    # Puducherry
+    ("../data/raw/puducherry_detailed.xlsx", "Puducherry", 2021, "target"),
+    ("../data/raw/Puducherry_2016_detailed.xlsx", "Puducherry", 2016, "target"),
+
+    # Extra states (2021 only)
+    ("../data/raw/andhra_pradesh_detailed.xlsx", "Andhra Pradesh", 2021, "extra"),
+    ("../data/raw/odisha_detailed.xlsx", "Odisha", 2021, "extra"),
+    ("../data/raw/delhi_detailed.xlsx", "Delhi", 2021, "extra"),
+    ("../data/raw/jharkhand_detailed.xlsx", "Jharkhand", 2021, "extra"),
 ]
 
 # =========================
@@ -99,13 +114,14 @@ def detect_columns(df, state_name):
 # CORE LOGIC
 # =========================
 
-def extract_top2(df, state_name, data_type):
+def extract_top2(df, state_name, year, data_type):
     """
     Extract top 2 candidates per constituency.
     
     Args:
         df: Raw DataFrame from Excel file
         state_name: State name
+        year: Election year
         data_type: 'target' or 'extra'
         
     Returns:
@@ -154,6 +170,7 @@ def extract_top2(df, state_name, data_type):
                 continue
             
             results.append({
+                "year": year,
                 "state": state_name,
                 "constituency": const,
                 "winner_party": str(winner[party_col]).strip(),
@@ -191,48 +208,48 @@ def process_all():
     processed_states = []
     failed_states = []
 
-    for path, state, dtype in FILES:
+    for path, state, year, dtype in FILES:
         # Convert relative path to absolute path
         abs_path = os.path.join(os.path.dirname(__file__), path)
         
         if not os.path.exists(abs_path):
             logger.error(f"File not found: {abs_path}")
-            failed_states.append((state, "File not found"))
+            failed_states.append((state, year, "File not found"))
             continue
 
-        logger.info(f"\nProcessing {state} ({dtype})...")
+        logger.info(f"\nProcessing {state} {year} ({dtype})...")
 
         try:
             # Read Excel file with row 3 as header (ECI format has actual header at row 3)
             df = pd.read_excel(abs_path, sheet_name=0, header=3)
             logger.info(f"  Loaded {len(df)} rows from Excel")
             
-            processed = extract_top2(df, state, dtype)
+            processed = extract_top2(df, state, year, dtype)
 
             if not processed.empty:
                 all_data.append(processed)
-                processed_states.append(state)
-                logger.info(f"  ✓ Successfully processed {state}")
+                processed_states.append((state, year))
+                logger.info(f"  ✓ Successfully processed {state} {year}")
             else:
-                logger.warning(f"  ✗ No data extracted from {state}")
-                failed_states.append((state, "No data extracted"))
+                logger.warning(f"  ✗ No data extracted from {state} {year}")
+                failed_states.append((state, year, "No data extracted"))
                 
         except Exception as e:
-            logger.error(f"Error processing {state}: {e}")
-            failed_states.append((state, str(e)))
+            logger.error(f"Error processing {state} {year}: {e}")
+            failed_states.append((state, year, str(e)))
 
     # Generate output
     logger.info("\n" + "=" * 60)
     logger.info("PIPELINE SUMMARY")
     logger.info("=" * 60)
     logger.info(f"Successfully processed: {len(processed_states)}/{len(FILES)}")
-    for state in processed_states:
-        logger.info(f"  ✓ {state}")
+    for state, year in processed_states:
+        logger.info(f"  ✓ {state} {year}")
     
     if failed_states:
-        logger.warning(f"\nFailed to process: {len(failed_states)} states")
-        for state, reason in failed_states:
-            logger.warning(f"  ✗ {state}: {reason}")
+        logger.warning(f"\nFailed to process: {len(failed_states)} files")
+        for state, year, reason in failed_states:
+            logger.warning(f"  ✗ {state} {year}: {reason}")
 
     if len(all_data) == 0:
         logger.error("No data processed! Pipeline halted.")
