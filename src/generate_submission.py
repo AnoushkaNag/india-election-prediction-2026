@@ -2,31 +2,26 @@ import pandas as pd
 
 
 def generate_predictions(df):
-    """Generate predicted winners using prediction and party/candidate names."""
+    """Generate predicted winners using candidate names with party fallback."""
     predictions = []
 
     for _, row in df.iterrows():
+        winner = None
+        
         if row["prediction"] == 1:
-            # Retain current winner
-            # Try candidate name first, fall back to party
-            if "winner_name" in df.columns and pd.notna(row.get("winner_name")):
-                winner = row["winner_name"]
-            else:
-                winner = row["winner_party"]
+            # Retain current winner - use candidate name
+            winner = row.get("winner_name")
         else:
-            # Flip to runner-up
-            # If margin is very small, predict flip; otherwise keep winner
-            if row.get("margin", 1) < 0.03:
-                if "runner_up_name" in df.columns and pd.notna(row.get("runner_up_name")):
-                    winner = row["runner_up_name"]
-                else:
-                    winner = row["runner_up_party"]
+            # Flip to runner-up - use candidate name
+            winner = row.get("runner_up_name")
+        
+        # Fallback to party if candidate name is missing or empty
+        if not winner or (isinstance(winner, str) and winner.lower() == "nan"):
+            if row["prediction"] == 1:
+                winner = row.get("winner_party")
             else:
-                if "winner_name" in df.columns and pd.notna(row.get("winner_name")):
-                    winner = row["winner_name"]
-                else:
-                    winner = row["winner_party"]
-
+                winner = row.get("runner_up_party")
+        
         predictions.append(winner)
 
     df["predicted_winner"] = predictions
