@@ -1,0 +1,73 @@
+METHODOLOGY NOTE - INDIA PREDICTS 2026
+======================================
+
+Your Name/Team Name: [ENTER YOUR NAME OR TEAM NAME]
+Submission Date: [DATE]
+
+1. DATA SOURCES
+===============
+List all data sources you used:
+- Myneta.info: Candidate information (names, parties, criminal cases, education, assets)
+- Election Commission of India (ECI): Official constituency and state information
+- [Add other sources you used]
+
+2. DATA COLLECTION & PREPROCESSING
+==================================
+Describe how you collected and prepared your data:
+- Downloaded candidate data from Myneta for all 5 states
+- Extracted constituency names and party affiliations
+- Cleaned candidate names (removed titles, standardized formats)
+- Merged with historical election data (if used)
+
+3. PREDICTION METHODOLOGY
+=========================
+Explain your prediction approach (min 150 words):
+
+My model predicts winners by analyzing candidate characteristics and party strength.
+Key factors considered:
+
+a) Candidate Strength:
+   - Educational background
+   - Professional experience
+   - Criminal record status
+   - Asset accumulation
+
+b) Party Factors:
+   - Historical performance in state/constituency
+   - Party infrastructure
+   - Alliance patterns
+
+c) Constituency Factors:
+   - [Describe any constituency-specific analysis]
+
+Prediction Logic:
+[Describe how you combined these factors to make predictions]
+
+4. MODEL ASSUMPTIONS
+====================
+- Assumption 1: [Your assumption]
+- Assumption 2: [Your assumption]
+- [Add more assumptions]
+
+5. STRENGTHS OF THIS APPROACH
+=============================
+- Uses official Myneta data sourced directly from candidates
+- Incorporates multiple factors beyond just party
+- [Other strengths]
+
+6. LIMITATIONS & CHALLENGES
+===========================
+- Some new candidates lack historical data
+- Election dynamics can be unpredictable
+- Regional/linguistic factors not fully captured
+- [Other limitations]
+
+7. CONFIDENCE LEVEL
+===================
+Overall prediction confidence: [HIGH / MEDIUM / LOW]
+States where I'm most confident: [STATE NAMES]
+States where I'm less confident: [STATE NAMES]
+Reasoning: [Explain confidence levels]
+
+---
+Total Words: [COUNT YOUR WORDS - MUST BE 150+]
