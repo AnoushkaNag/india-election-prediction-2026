@@ -1,0 +1,150 @@
+================================================================================
+                         INTEGRATION REPORT
+================================================================================
+
+================================================================================
+FINAL SUBMISSION SUMMARY
+================================================================================
+
+Total Constituencies: 824
+Unique States: 5
+Data Completeness: 100% (no missing values)
+
+Matching Quality:
+  [OK] Full Matches (candidate + party): 560 (68.0%)
+  [WARN] Party Fallback (fuzzy const): 227 (27.5%)
+  [WARN] Fuzzy Fail (used party code): 37 (4.5%)
+
+================================================================================
+STATE-WISE BREAKDOWN
+================================================================================
+
+Assam:
+  Constituencies: 126
+  Full Matches: 94 (74.6%)
+  Fallbacks: 32 (25.4%)
+
+Kerala:
+  Constituencies: 140
+  Full Matches: 93 (66.4%)
+  Fallbacks: 47 (33.6%)
+
+Puducherry:
+  Constituencies: 30
+  Full Matches: 16 (53.3%)
+  Fallbacks: 14 (46.7%)
+
+Tamil Nadu:
+  Constituencies: 234
+  Full Matches: 98 (41.9%)
+  Fallbacks: 136 (58.1%)
+
+West Bengal:
+  Constituencies: 294
+  Full Matches: 259 (88.1%)
+  Fallbacks: 35 (11.9%)
+
+================================================================================
+UNMATCHED CONSTITUENCIES (Using Party Code Fallback)
+================================================================================
+
+Total: 37
+
+  - Assam / BAITHALANGSO
+    Predicted: BJP
+  - Assam / HAJO
+    Predicted: BJP
+  - Assam / JAMUNAMUKH
+    Predicted: AIUDF
+  - Assam / PANERY
+    Predicted: BJP
+  - Assam / SOOTEA
+    Predicted: BJP
+  - Assam / SORBHOG
+    Predicted: BJP
+  - West Bengal / Bally
+    Predicted: BJP
+  - West Bengal / Ballygunge
+    Predicted: AITC
+  - West Bengal / Budge Budge
+    Predicted: AITC
+  - West Bengal / Champdani
+    Predicted: AITC
+  - West Bengal / Diamond Harbour
+    Predicted: AITC
+  - West Bengal / Domjur
+    Predicted: AITC
+  - West Bengal / Dum Dum
+    Predicted: AITC
+  - West Bengal / English Bazar
+    Predicted: BJP
+  - West Bengal / Entally
+    Predicted: AITC
+  - West Bengal / Galsi
+    Predicted: AITC
+  - West Bengal / Goghat
+    Predicted: AITC
+  - West Bengal / Howrah Madhya
+    Predicted: AITC
+  - West Bengal / Jagatdal
+    Predicted: AITC
+  - West Bengal / Jorasanko
+    Predicted: AITC
+  - West Bengal / Kasba
+    Predicted: AITC
+  - West Bengal / Kashipur-Belgachhia
+    Predicted: AITC
+  - West Bengal / Khandaghosh
+    Predicted: AITC
+  - West Bengal / Khardaha
+    Predicted: AITC
+  - West Bengal / Kolkata Port
+    Predicted: AITC
+  - West Bengal / Mangalkot
+    Predicted: AITC
+  - West Bengal / Metiaburuz
+    Predicted: AITC
+  - West Bengal / Minakhan
+    Predicted: AITC
+  - West Bengal / Patharpratima
+    Predicted: AITC
+  - West Bengal / Rajarhat Gopalpur
+    Predicted: AITC
+  - West Bengal / Rajarhat New Town
+    Predicted: AITC
+  - West Bengal / Rashbehari
+    Predicted: AITC
+  - West Bengal / Sandeshkhali
+    Predicted: AITC
+  - West Bengal / Sonarpur Uttar
+    Predicted: AITC
+  - West Bengal / Tehatta
+    Predicted: BJP
+  - West Bengal / Tollyganj
+    Predicted: AITC
+  - West Bengal / Uluberia Uttar
+    Predicted: AITC
+
+================================================================================
+SAMPLE DATA (First 10 rows)
+================================================================================
+
+  1. Assam           | ABHAYAPURI NORTH          | pradip sarkar
+  2. Assam           | ABHAYAPURI SOUTH          | pradip sarkar
+  3. Assam           | ALGAPUR                   | nizanur rahman
+  4. Assam           | AMGURI                    | tanzil hussain
+  5. Assam           | BADARPUR                  | mazibur rahman
+  6. Assam           | BAGHBAR                   | akhil gogoi
+  7. Assam           | BAITHALANGSO              | BJP
+  8. Assam           | BARAMA                    | abul majan
+  9. Assam           | BARCHALLA                 | ritu baran sarmah
+ 10. Assam           | BARHAMPUR                 | jitu goswami
+
+================================================================================
+FILES GENERATED
+================================================================================
+
+[OK] outputs/final_submission_FINAL_clean.csv
+  Format: state | constituency | predicted_winner
+  Rows: 824
+  Ready for submission
